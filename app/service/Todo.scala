@@ -31,4 +31,15 @@ class TodoService @Inject() (dbapi: DBApi) { // @injectでplayではDIできる
     }
   }
 
+  def insert(todo: Todo) = {
+    db.withConnection { implicit  connection =>
+      SQL(
+        """
+          |insert into todo values ((select next value for todo_seq), {name})
+          |""".stripMargin
+      ).on(
+        "name" -> todo.name
+      ).executeUpdate()
+    }
+  }
 }

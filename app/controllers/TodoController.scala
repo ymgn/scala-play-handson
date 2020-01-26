@@ -29,7 +29,7 @@ extends MessagesAbstractController(mcc){
   // 新規登録画面から叩かれるtodo追加エンドポイント
   def todoAdd() = Action { implicit  request: MessagesRequest[AnyContent] =>
     val name: String = todoForm.bindFromRequest().get
-    println(name)
-    Ok("Save")
+    todoService.insert(Todo(name))
+    Redirect(routes.TodoController.list())    
   }
 }
