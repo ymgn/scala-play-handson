@@ -48,4 +48,9 @@ extends MessagesAbstractController(mcc){
     todoService.update(todoId, Todo(Some(todoId), name)) // Someを使って明示的に値があると示した状態でOptionalの引数に渡す
     Redirect(routes.TodoController.list())
   }
+
+  def todoDelete(todoId: Long) = Action { implicit request: MessagesRequest[AnyContent] =>
+    todoService.delete(todoId)
+    Redirect(routes.TodoController.list())
+  }
 }

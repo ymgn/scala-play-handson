@@ -65,4 +65,10 @@ class TodoService @Inject() (dbapi: DBApi) { // @injectでplayではDIできる
       ).executeUpdate()
     }
   }
+
+  def delete(id: Long) = {
+    db.withConnection { implicit connection =>
+      SQL("delete from todo where id = {id}").on("id" -> id).executeUpdate()
+    }
+  }
 }
