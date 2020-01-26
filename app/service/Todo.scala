@@ -8,15 +8,17 @@ import play.api.db.DBApi
 
 import scala.language.postfixOps
 
-case class Todo(name: String)   // caseクラスで作成されたTodoクラス
+case class Todo(id:Option[Long], name: String)   // caseクラスで作成されたTodoクラス
 
 @javax.inject.Singleton
 class TodoService @Inject() (dbapi: DBApi) { // @injectでplayではDIできる
+
   private val db = dbapi.database("default") // DB名 defaultにつなぐ
 
   val simple = {  // 関数オブジェクトを作成
-    get[String]("todo.name") map {    // 受け取った引数から"todo.name"という名前で取り出す
-      case name => Todo(name)   // nameが取り出せた時?にTodoインスタンスを作成する
+    get[Option[Long]]("todo.id") ~
+    get[String]("todo.name") map {    // 受け取った引数から"todo.id"と"todo.name"というプロパティを取り出す
+      case id~name => Todo(id, name)   // 取り出した中身でTodoインスタンスを作成する
     }
   }
 
@@ -38,6 +40,27 @@ class TodoService @Inject() (dbapi: DBApi) { // @injectでplayではDIできる
           |insert into todo values ((select next value for todo_seq), {name})
           |""".stripMargin
       ).on(
+        "name" -> todo.name
+      ).executeUpdate()
+    }
+  }
+
+  def findById(id: Long): Option[Todo] = {
+    db.withConnection { implicit connection =>
+      SQL("select * from todo where id = {id}").on("id" -> id).as(simple.singleOpt) // パーサーを渡して、0件か1件かにパースする
+    }
+  }
+
+  def update(id: Long, todo: Todo) = {
+    db.withConnection { implicit connection =>
+      SQL(
+        """
+          |update todo
+          |set name = {name}
+          |where id = {id}
+          |""".stripMargin
+      ).on(
+        "id" -> id,
         "name" -> todo.name
       ).executeUpdate()
     }

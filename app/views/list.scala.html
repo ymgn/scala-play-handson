@@ -18,7 +18,7 @@
             <tbody>
             @items.map { todo =>
                 <tr>
-                    <td>@todo.name</td>
+                    <td><a href="@controllers.routes.TodoController.todoEdit(todo.id.get)">@todo.name</a></td>
                 </tr>
             }
             </tbody>

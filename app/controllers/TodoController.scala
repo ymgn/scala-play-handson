@@ -29,7 +29,23 @@ extends MessagesAbstractController(mcc){
   // 新規登録画面から叩かれるtodo追加エンドポイント
   def todoAdd() = Action { implicit  request: MessagesRequest[AnyContent] =>
     val name: String = todoForm.bindFromRequest().get
-    todoService.insert(Todo(name))
+    todoService.insert(Todo(id = None, name))
     Redirect(routes.TodoController.list())    
+  }
+
+  // Todoの編集画面
+  def todoEdit(todoId: Long) = Action { implicit request: MessagesRequest[AnyContent] =>
+    // todoServiceのfindByIdから取得したデータをtodoFormにわたす
+    todoService.findById(todoId).map { todo =>
+      Ok(views.html.editForm(todoId, todoForm.fill(todo.name)))
+    }.getOrElse(NotFound)
+  }
+
+  // 編集画面から叩かれる、todo更新エンドポイント
+  def todoUpdate(todoId: Long) = Action { implicit request: MessagesRequest[AnyContent] =>
+    val name: String = todoForm.bindFromRequest().get
+
+    todoService.update(todoId, Todo(Some(todoId), name)) // Someを使って明示的に値があると示した状態でOptionalの引数に渡す
+    Redirect(routes.TodoController.list())
   }
 }
